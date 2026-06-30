@@ -7,10 +7,13 @@ const NOMINATIM_API_URL = "https://nominatim.openstreetmap.org/search";
 const DEFAULT_POSTAL = "M1E4V4";
 const DEFAULT_TIMEZONE = "America/Toronto";
 const DEFAULT_HOURS = 12;
-const DEFAULT_SCARBOROUGH_FALLBACK = {
-  latitude: 43.7729744,
-  longitude: -79.2576479,
-  name: "Scarborough, Toronto, Ontario, Canada",
+
+const POSTAL_FALLBACK_COORDINATES: Record<string, { latitude: number; longitude: number; name: string }> = {
+  M1E4V4: {
+    latitude: 43.7729744,
+    longitude: -79.2576479,
+    name: "Scarborough, Toronto, Ontario, Canada",
+  },
 };
 
 type ForecastPoint = {
@@ -44,6 +47,10 @@ function parseNumber(value: unknown): number | null {
 
 function normalizeLocation(query: string | null): string {
   return (query || DEFAULT_POSTAL).trim() || DEFAULT_POSTAL;
+}
+
+function normalizeForComparison(value: string): string {
+  return value.replace(/\s+/g, "").toUpperCase();
 }
 
 function toHourMarker(timezone: string): string {
@@ -80,10 +87,6 @@ async function fetchJson<T>(url: string): Promise<T> {
 function looksLikePostalCode(value: string): boolean {
   const normalized = value.replace(/\s+/g, "").toUpperCase();
   return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(normalized);
-}
-
-function normalizeForComparison(value: string): string {
-  return value.replace(/\s+/g, "").toUpperCase();
 }
 
 async function resolveWithFallbackSearch(query: string): Promise<{ latitude: number; longitude: number; name: string } | null> {
@@ -148,6 +151,11 @@ async function resolveCoordinates(postalOrCity: string): Promise<{ latitude: num
   const query = postalOrCity.trim();
   const normalizedPostal = normalizeForComparison(query);
 
+  const fallbackForPostal = POSTAL_FALLBACK_COORDINATES[normalizedPostal];
+  if (fallbackForPostal) {
+    return fallbackForPostal;
+  }
+
   const url = `${GEOCODE_API_URL}?${new URLSearchParams({
     name: query,
     count: "1",
@@ -166,22 +174,15 @@ async function resolveCoordinates(postalOrCity: string): Promise<{ latitude: num
     };
   }
 
-  if (normalizedPostal === "M1E4V4") {
-    return DEFAULT_SCARBOROUGH_FALLBACK;
-  }
-
   const fallback = await resolveWithFallbackSearch(query);
   if (fallback) {
     return fallback;
   }
 
   if (looksLikePostalCode(normalizedPostal)) {
-    const normalizedLocation = normalizedPostal.includes("M1E4V4")
-      ? DEFAULT_SCARBOROUGH_FALLBACK
-      : null;
-
-    if (normalizedLocation) {
-      return normalizedLocation;
+    const normalizedFallback = POSTAL_FALLBACK_COORDINATES[normalizedPostal];
+    if (normalizedFallback) {
+      return normalizedFallback;
     }
   }
 
