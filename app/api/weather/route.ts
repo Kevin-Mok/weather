@@ -4,9 +4,14 @@ const GEOCODE_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 const NOMINATIM_API_URL = "https://nominatim.openstreetmap.org/search";
 
-const DEFAULT_POSTAL = "Toronto, Scarborough, Ontario, Canada";
+const DEFAULT_POSTAL = "M1E4V4";
 const DEFAULT_TIMEZONE = "America/Toronto";
 const DEFAULT_HOURS = 12;
+const DEFAULT_SCARBOROUGH_FALLBACK = {
+  latitude: 43.7729744,
+  longitude: -79.2576479,
+  name: "Scarborough, Toronto, Ontario, Canada",
+};
 
 type ForecastPoint = {
   time: string;
@@ -77,49 +82,71 @@ function looksLikePostalCode(value: string): boolean {
   return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(normalized);
 }
 
+function normalizeForComparison(value: string): string {
+  return value.replace(/\s+/g, "").toUpperCase();
+}
+
 async function resolveWithFallbackSearch(query: string): Promise<{ latitude: number; longitude: number; name: string } | null> {
-  const url = `${NOMINATIM_API_URL}?${new URLSearchParams({
-    q: query,
-    format: "json",
-    addressdetails: "0",
-    limit: "1",
-  })}`;
+  const candidates = [
+    query,
+    `${query} Toronto, Ontario, Canada`,
+    "Toronto, Scarborough, Ontario, Canada",
+    "Scarborough, Toronto, Ontario, Canada",
+  ];
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "User-Agent": "weather-toronto-app/1.0",
-    },
-    cache: "no-store",
-  });
+  for (const candidate of candidates) {
+    const normalizedCandidate = candidate.trim();
+    if (!normalizedCandidate) {
+      continue;
+    }
 
-  if (!response.ok) {
-    return null;
+    const url = `${NOMINATIM_API_URL}?${new URLSearchParams({
+      q: normalizedCandidate,
+      format: "json",
+      addressdetails: "0",
+      countrycodes: "ca",
+      limit: "1",
+    })}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "User-Agent": "weather-toronto-app/1.0",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      continue;
+    }
+
+    const payload = (await response.json()) as NominatimLocation[];
+    const first = payload?.[0];
+
+    if (!first?.lat || !first?.lon) {
+      continue;
+    }
+
+    const latitude = Number(first.lat);
+    const longitude = Number(first.lon);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      continue;
+    }
+
+    return {
+      latitude,
+      longitude,
+      name: first.display_name || normalizedCandidate,
+    };
   }
 
-  const payload = (await response.json()) as NominatimLocation[];
-  const first = payload?.[0];
-
-  if (!first?.lat || !first?.lon) {
-    return null;
-  }
-
-  const latitude = Number(first.lat);
-  const longitude = Number(first.lon);
-
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-    return null;
-  }
-
-  return {
-    latitude,
-    longitude,
-    name: first.display_name || query,
-  };
+  return null;
 }
 
 async function resolveCoordinates(postalOrCity: string): Promise<{ latitude: number; longitude: number; name: string } | null> {
   const query = postalOrCity.trim();
+  const normalizedPostal = normalizeForComparison(query);
 
   const url = `${GEOCODE_API_URL}?${new URLSearchParams({
     name: query,
@@ -131,21 +158,37 @@ async function resolveCoordinates(postalOrCity: string): Promise<{ latitude: num
   const payload = await fetchJson<{ results?: Array<OMMetaLocation> }>(url);
   const first = payload.results?.[0];
 
-  if (!first) {
-    return resolveWithFallbackSearch(query);
+  if (first) {
+    return {
+      latitude: Number(first.latitude),
+      longitude: Number(first.longitude),
+      name: first.name || postalOrCity,
+    };
   }
 
-  return {
-    latitude: Number(first.latitude),
-    longitude: Number(first.longitude),
-    name: first.name || postalOrCity,
-  };
+  if (normalizedPostal === "M1E4V4") {
+    return DEFAULT_SCARBOROUGH_FALLBACK;
+  }
+
+  const fallback = await resolveWithFallbackSearch(query);
+  if (fallback) {
+    return fallback;
+  }
+
+  if (looksLikePostalCode(normalizedPostal)) {
+    const normalizedLocation = normalizedPostal.includes("M1E4V4")
+      ? DEFAULT_SCARBOROUGH_FALLBACK
+      : null;
+
+    if (normalizedLocation) {
+      return normalizedLocation;
+    }
+  }
+
+  return null;
 }
 
-function buildResponsePoint(
-  index: number,
-  hourly: Record<string, unknown[]>
-): ForecastPoint {
+function buildResponsePoint(index: number, hourly: Record<string, unknown[]>): ForecastPoint {
   return {
     time: String(hourly.time?.[index] || ""),
     temp: parseNumber(hourly.temperature_2m?.[index]),

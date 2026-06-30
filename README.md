@@ -43,7 +43,7 @@ http://localhost:3000
 ### API endpoint
 
 - `GET /api/weather?postal=<string>&hours=<6|12|24>&timezone=America/Toronto`
-  - `postal` defaults to `Toronto, Scarborough, Ontario, Canada`.
+  - `postal` defaults to `M1E4V4` (mapped to Scarborough, Toronto fallback coords).
   - returns current point plus hourly points for the requested window.
 
 ## Day-to-Day Usage

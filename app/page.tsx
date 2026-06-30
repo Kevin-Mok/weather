@@ -20,8 +20,10 @@ type WeatherResponse = {
   hourly: HourPoint[];
 };
 
-const DEFAULT_POSTAL = "Toronto, Scarborough, Ontario, Canada";
+const DEFAULT_POSTAL = "M1E4V4";
 const DEFAULT_HOURS = 12;
+const DEFAULT_LATITUDE = "43.7729744";
+const DEFAULT_LONGITUDE = "-79.2576479";
 
 function formatHour(time: string) {
   return time.slice(11, 16);
@@ -103,12 +105,17 @@ function labelFor(code: number | null) {
   return "Cloudy";
 }
 
-async function loadWeather(postal: string, hours: number) {
+async function loadWeather(postal: string, hours: number, useDefaultCoordinates = false) {
   const params = new URLSearchParams({
     postal,
     hours: String(hours),
     timezone: "America/Toronto",
   });
+
+  if (useDefaultCoordinates) {
+    params.set("lat", DEFAULT_LATITUDE);
+    params.set("lon", DEFAULT_LONGITUDE);
+  }
 
   const res = await fetch(`/api/weather?${params.toString()}`);
   if (!res.ok) {
@@ -135,6 +142,7 @@ export default function Home() {
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isDefaultQuery, setIsDefaultQuery] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -143,7 +151,7 @@ export default function Home() {
       try {
         setLoading(true);
         setError("");
-        const payload = await loadWeather(postal, hours);
+        const payload = await loadWeather(postal, hours, isDefaultQuery);
         if (mounted) {
           setWeather(payload);
         }
@@ -164,11 +172,13 @@ export default function Home() {
     return () => {
       mounted = false;
     };
-  }, [postal, hours]);
+  }, [postal, hours, isDefaultQuery]);
 
   const submitQuery = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setPostal(searchPostal.trim() || DEFAULT_POSTAL);
+    const normalized = searchPostal.trim() || DEFAULT_POSTAL;
+    setPostal(normalized);
+    setIsDefaultQuery(normalized === DEFAULT_POSTAL);
   };
 
   const header = useMemo(() => {
