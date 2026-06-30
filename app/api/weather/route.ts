@@ -212,6 +212,13 @@ export async function GET(request: NextRequest) {
   let longitude = parseFloat(lonParam || "NaN");
   let locationLabel = postal;
 
+  const normalizedPostal = normalizeForComparison(postal);
+  const defaultPostFallback = POSTAL_FALLBACK_COORDINATES[normalizedPostal];
+
+  if (Number.isFinite(latitude) && Number.isFinite(longitude) && defaultPostFallback) {
+    locationLabel = defaultPostFallback.name;
+  }
+
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     const resolved = await resolveCoordinates(postal);
 
