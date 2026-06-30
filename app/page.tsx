@@ -16,7 +16,6 @@ type WeatherResponse = {
     name: string;
     timezone: string;
   };
-  current: HourPoint;
   hourly: HourPoint[];
 };
 
@@ -35,7 +34,7 @@ function valueOrPlaceholder(value: number | null, suffix: string) {
 
 function iconFor(code: number | null) {
   if (code === null) {
-    return "🌡️";
+    return "☁️";
   }
 
   if (code === 0) {
@@ -43,66 +42,34 @@ function iconFor(code: number | null) {
   }
 
   if (code >= 1 && code <= 3) {
-    return code === 1 ? "🌤️" : "☁️";
+    return code === 1 ? "🌤️" : "⛅";
   }
 
-  if ([45, 48].includes(code)) {
-    return "🌫";
+  if (code === 45 || code === 48) {
+    return "🌫️";
   }
 
-  if ((code >= 51 && code <= 57) || (code >= 80 && code <= 82)) {
-    return "🌦️";
+  if (code >= 51 && code <= 57) {
+    return "🌧️";
   }
 
-  if ((code >= 61 && code <= 67) || (code >= 96 && code <= 99)) {
+  if (code >= 61 && code <= 67) {
     return "🌧️";
   }
 
   if (code >= 71 && code <= 77) {
-    return "❄️";
+    return "🌨️";
   }
 
-  return "🌈";
-}
-
-function labelFor(code: number | null) {
-  if (code === null) {
-    return "Condition unknown";
-  }
-
-  if (code === 0) {
-    return "Clear";
-  }
-
-  if (code >= 1 && code <= 3) {
-    return code === 1 ? "Mainly clear" : "Partly/mostly cloudy";
-  }
-
-  if (code === 45 || code === 48) {
-    return "Fog";
-  }
-
-  if (code >= 51 && code <= 57) {
-    return "Drizzle";
-  }
-
-  if (code >= 61 && code <= 67) {
-    return "Rain";
-  }
-
-  if (code >= 71 && code <= 77) {
-    return "Snow";
-  }
-
-  if (code >= 80 && code <= 82) {
-    return "Showers";
+  if ((code >= 80 && code <= 82) || (code >= 85 && code <= 86)) {
+    return "🌦️";
   }
 
   if (code >= 95 && code <= 99) {
-    return "Thunderstorms";
+    return "⛈️";
   }
 
-  return "Cloudy";
+  return "☁️";
 }
 
 async function loadWeather(postal: string, hours: number, useDefaultCoordinates = false) {
@@ -132,10 +99,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const hours = DEFAULT_HOURS;
-  const postal = DEFAULT_POSTAL;
-  const isDefaultQuery = true;
-
   useEffect(() => {
     let mounted = true;
 
@@ -143,7 +106,7 @@ export default function Home() {
       try {
         setLoading(true);
         setError("");
-        const payload = await loadWeather(postal, hours, isDefaultQuery);
+        const payload = await loadWeather(DEFAULT_POSTAL, DEFAULT_HOURS, true);
         if (mounted) {
           setWeather(payload);
         }
@@ -164,13 +127,11 @@ export default function Home() {
     return () => {
       mounted = false;
     };
-  }, [postal, hours]);
+  }, []);
 
   return (
     <main className="page weather-only">
-      {loading && !weather && !error ? (
-        <p className="status">Loading forecast…</p>
-      ) : null}
+      {loading && !weather && !error ? <p className="status">Loading forecast…</p> : null}
 
       {error ? <p className="card error">{error}</p> : null}
 
@@ -188,7 +149,6 @@ export default function Home() {
                 </div>
                 <p className="hour-sub">Feels {valueOrPlaceholder(point.feelsLike, "°C")}</p>
                 <p className="hour-sub">P: {valueOrPlaceholder(point.precipProb, "%")} · {valueOrPlaceholder(point.precip, "mm")}</p>
-                <p className="hour-sub">{labelFor(point.conditionCode)}</p>
               </article>
             ))}
           </div>

@@ -1,12 +1,8 @@
 :root {
   --bg: #05080f;
-  --bg-soft: #0e1621;
   --card: #111b26;
-  --card-soft: #172535;
   --text: #edf3ff;
   --muted: #a3b2c7;
-  --primary: #65b5ff;
-  --accent: #3cb8b8;
   --danger: #ff6b6b;
   --border: #233247;
 }
@@ -29,66 +25,15 @@ body {
 }
 
 .page {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 24px 16px 32px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.title {
+  width: 100%;
+  max-width: none;
   margin: 0;
-  font-size: 1.6rem;
-  letter-spacing: 0.2px;
-}
-
-.subtitle {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.input,
-.select,
-.button {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--card);
-  color: var(--text);
-  padding: 10px 12px;
-}
-
-.input {
-  min-width: 170px;
-}
-
-.button {
-  background: linear-gradient(180deg, #2a6a9a, #2a5c85);
-  cursor: pointer;
-}
-
-.button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  padding: 6px 8px 8px;
 }
 
 .grid {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .status {
@@ -103,103 +48,50 @@ body {
   padding: 16px;
 }
 
-.current {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: auto 1fr;
-  align-items: center;
+.weather-only {
+  min-height: 100svh;
+  height: 100svh;
+  display: flex;
+  align-items: stretch;
 }
 
-.current .temp {
-  font-size: 2.2rem;
-  font-weight: 700;
-}
-
-.current .feels {
-  color: var(--muted);
-  margin-top: 3px;
-}
-
-.cond {
-  font-size: 0.95rem;
-  color: var(--muted);
-}
-
-.cond-badge {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(180deg, rgba(58, 89, 132, 0.6), rgba(27, 53, 83, 0.6));
-  border: 1px solid var(--border);
-  font-size: 2rem;
+.hourly-only {
+  margin: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .hourly {
+  flex: 1;
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
-
-.hourly-section {
-  margin-top: 12px;
-}
-
-.section-title {
-  margin: 8px 0;
-  font-size: 1.1rem;
-}
-
-.hourly-six {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-}
-
-.hourly-six .hour-card {
-  padding: 10px;
-}
-
-.hourly-six .hour-time {
-  font-size: 0.82rem;
-}
-
-.hourly-six .hour-main {
-  margin: 6px 0 4px;
-  gap: 6px;
-}
-
-.hourly-six .hour-icon {
-  width: 30px;
-  height: 30px;
-  font-size: 0.9rem;
-}
-
-.hourly-six .hour-number {
-  font-size: 1rem;
-}
-
-.hourly-six .hour-sub {
-  font-size: 0.76rem;
+  min-height: 100%;
+  align-content: stretch;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .hour-card {
   background: linear-gradient(180deg, rgba(23, 37, 53, 0.85), rgba(15, 24, 33, 0.85));
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
 }
 
 .hour-time {
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 0.94rem;
   color: var(--muted);
 }
 
 .hour-main {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 8px 0 6px;
+  gap: 6px;
+  margin: 3px 0;
 }
 
 .hour-icon {
@@ -210,17 +102,22 @@ body {
   place-items: center;
   background: rgba(35, 59, 86, 0.7);
   border: 1px solid var(--border);
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .hour-number {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
 }
 
 .hour-sub {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
+  margin: 2px 0;
+}
+
+.compact-hour-card {
+  height: 100%;
 }
 
 .error {
@@ -228,46 +125,16 @@ body {
   border: 1px solid rgba(255, 107, 107, 0.45);
 }
 
-@media (max-width: 640px) {
-  .title {
-    font-size: 1.35rem;
-  }
-
-  .current {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
+@media (min-width: 641px) {
   .hourly {
-    grid-template-columns: 1fr;
-  }
-
-  .hourly-six {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
   }
 
-  .hourly-six .hour-card {
-    padding: 8px;
+  .weather-only {
+    padding: 10px;
   }
 
-  .hourly-six .hour-main {
-    margin: 2px 0;
-    gap: 4px;
-  }
-
-  .hourly-six .hour-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 0.82rem;
-  }
-
-  .hourly-six .hour-number {
-    font-size: 0.9rem;
-  }
-
-  .hourly-six .hour-sub {
-    font-size: 0.68rem;
-    line-height: 1.2;
+  .hour-card {
+    min-height: 140px;
   }
 }
