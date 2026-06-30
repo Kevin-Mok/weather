@@ -240,8 +240,8 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="grid" style={{ marginTop: 12 }}>
-            <h2 style={{ margin: "8px 0", fontSize: "1.1rem" }}>Hourly forecast</h2>
+          <section className="grid hourly-section">
+            <h2 className="section-title">Hourly forecast</h2>
             <div className={hours === 6 ? "hourly hourly-six" : "hourly"}>
               {weather.hourly.map((point) => (
                 <article key={point.time} className="hour-card">

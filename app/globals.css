@@ -142,6 +142,15 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
+.hourly-section {
+  margin-top: 12px;
+}
+
+.section-title {
+  margin: 8px 0;
+  font-size: 1.1rem;
+}
+
 .hourly-six {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
@@ -234,17 +243,31 @@ body {
   }
 
   .hourly-six {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
   }
+
   .hourly-six .hour-card {
-    padding: 10px;
+    padding: 8px;
   }
+
   .hourly-six .hour-main {
-    margin: 4px 0;
+    margin: 2px 0;
     gap: 4px;
   }
+
+  .hourly-six .hour-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.82rem;
+  }
+
+  .hourly-six .hour-number {
+    font-size: 0.9rem;
+  }
+
   .hourly-six .hour-sub {
-    font-size: 0.73rem;
-    line-height: 1.25;
+    font-size: 0.68rem;
+    line-height: 1.2;
   }
 }
