@@ -142,6 +142,38 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
+.hourly-six {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hourly-six .hour-card {
+  padding: 10px;
+}
+
+.hourly-six .hour-time {
+  font-size: 0.82rem;
+}
+
+.hourly-six .hour-main {
+  margin: 6px 0 4px;
+  gap: 6px;
+}
+
+.hourly-six .hour-icon {
+  width: 30px;
+  height: 30px;
+  font-size: 0.9rem;
+}
+
+.hourly-six .hour-number {
+  font-size: 1rem;
+}
+
+.hourly-six .hour-sub {
+  font-size: 0.76rem;
+}
+
 .hour-card {
   background: linear-gradient(180deg, rgba(23, 37, 53, 0.85), rgba(15, 24, 33, 0.85));
   border: 1px solid var(--border);
@@ -199,5 +231,20 @@ body {
 
   .hourly {
     grid-template-columns: 1fr;
+  }
+
+  .hourly-six {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hourly-six .hour-card {
+    padding: 10px;
+  }
+  .hourly-six .hour-main {
+    margin: 4px 0;
+    gap: 4px;
+  }
+  .hourly-six .hour-sub {
+    font-size: 0.73rem;
+    line-height: 1.25;
   }
 }

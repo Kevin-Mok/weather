@@ -21,7 +21,7 @@ type WeatherResponse = {
 };
 
 const DEFAULT_POSTAL = "M1E4V4";
-const DEFAULT_HOURS = 12;
+const DEFAULT_HOURS = 6;
 const DEFAULT_LATITUDE = "43.7729744";
 const DEFAULT_LONGITUDE = "-79.2576479";
 
@@ -242,7 +242,7 @@ export default function Home() {
 
           <section className="grid" style={{ marginTop: 12 }}>
             <h2 style={{ margin: "8px 0", fontSize: "1.1rem" }}>Hourly forecast</h2>
-            <div className="hourly">
+            <div className={hours === 6 ? "hourly hourly-six" : "hourly"}>
               {weather.hourly.map((point) => (
                 <article key={point.time} className="hour-card">
                   <p className="hour-time">{formatHour(point.time)}</p>
