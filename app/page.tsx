@@ -72,6 +72,50 @@ function iconFor(code: number | null) {
   return "☁️";
 }
 
+function labelFor(code: number | null) {
+  if (code === null) {
+    return "Condition unknown";
+  }
+
+  if (code === 0) {
+    return "Clear";
+  }
+
+  if (code >= 1 && code <= 3) {
+    return code === 1 ? "Partly clear" : "Cloudy";
+  }
+
+  if (code === 45 || code === 48) {
+    return "Fog";
+  }
+
+  if (code >= 51 && code <= 57) {
+    return "Drizzle";
+  }
+
+  if (code >= 61 && code <= 67) {
+    return "Rain";
+  }
+
+  if (code >= 71 && code <= 77) {
+    return "Snow";
+  }
+
+  if (code >= 80 && code <= 82) {
+    return "Showers";
+  }
+
+  if (code >= 85 && code <= 86) {
+    return "Snow shower";
+  }
+
+  if (code >= 95 && code <= 99) {
+    return "Thunderstorms";
+  }
+
+  return "Cloudy";
+}
+
 async function loadWeather(postal: string, hours: number, useDefaultCoordinates = false) {
   const params = new URLSearchParams({
     postal,
@@ -149,13 +193,18 @@ export default function Home() {
                   <span className="hour-number">{valueOrPlaceholder(point.temp, "°C")}</span>
                 </div>
 
+                <p className="metric metric-condition">
+                  <span className="metric-label">Condition</span>
+                  <span className="metric-value">{labelFor(point.conditionCode)}</span>
+                </p>
+
                 <p className="metric metric-feels">
-                  <span className="metric-label">Feels:</span>
+                  <span className="metric-label">Feels</span>
                   <span className="metric-value">{valueOrPlaceholder(point.feelsLike, "°C")}</span>
                 </p>
 
                 <p className="metric metric-precip">
-                  <span className="metric-label">Precip chance:</span>
+                  <span className="metric-label">Precip chance</span>
                   <span className="metric-value">{valueOrPlaceholder(point.precipProb, "%")} · {valueOrPlaceholder(point.precip, "mm")}</span>
                 </p>
               </article>
