@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type HourPoint = {
   time: string;
@@ -127,22 +127,14 @@ async function loadWeather(postal: string, hours: number, useDefaultCoordinates 
   return payload;
 }
 
-function currentLabel(point: HourPoint) {
-  const t = valueOrPlaceholder(point.temp, "°C");
-  const f = valueOrPlaceholder(point.feelsLike, "°C");
-  const p = valueOrPlaceholder(point.precipProb, "%");
-  const mm = valueOrPlaceholder(point.precip, "mm");
-  return { t, f, p, mm };
-}
-
 export default function Home() {
-  const [postal, setPostal] = useState(DEFAULT_POSTAL);
-  const [hours, setHours] = useState(DEFAULT_HOURS);
-  const [searchPostal, setSearchPostal] = useState(DEFAULT_POSTAL);
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isDefaultQuery, setIsDefaultQuery] = useState(true);
+
+  const hours = DEFAULT_HOURS;
+  const postal = DEFAULT_POSTAL;
+  const isDefaultQuery = true;
 
   useEffect(() => {
     let mounted = true;
@@ -172,95 +164,36 @@ export default function Home() {
     return () => {
       mounted = false;
     };
-  }, [postal, hours, isDefaultQuery]);
-
-  const submitQuery = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const normalized = searchPostal.trim() || DEFAULT_POSTAL;
-    setPostal(normalized);
-    setIsDefaultQuery(normalized === DEFAULT_POSTAL);
-  };
-
-  const header = useMemo(() => {
-    if (!weather) {
-      return "Toronto Weather";
-    }
-
-    return `${weather.location.name} Weather`;
-  }, [weather]);
+  }, [postal, hours]);
 
   return (
-    <main className="page">
-      <section className="header">
-        <div>
-          <h1 className="title">{header}</h1>
-          <p className="subtitle">Open-Meteo • no API key • hourly forecast + feels-like</p>
-        </div>
-        <form className="form" onSubmit={submitQuery}>
-          <input
-            value={searchPostal}
-            onChange={(event) => setSearchPostal(event.target.value)}
-            aria-label="Location search"
-            className="input"
-            placeholder="Postal code or city"
-          />
-          <select
-            value={hours}
-            onChange={(event) => setHours(Number(event.target.value))}
-            aria-label="Hours"
-            className="select"
-          >
-            <option value={6}>6h</option>
-            <option value={12}>12h</option>
-            <option value={24}>24h</option>
-          </select>
-          <button type="submit" className="button" disabled={loading}>
-            {loading ? "Updating..." : "Refresh"}
-          </button>
-        </form>
-      </section>
+    <main className="page weather-only">
+      {loading && !weather && !error ? (
+        <p className="status">Loading forecast…</p>
+      ) : null}
 
-      <p className="status">Showing next {hours} hour{hours > 1 ? "s" : ""} from Open-Meteo.</p>
+      {error ? <p className="card error">{error}</p> : null}
 
-      {error && <p className="card error">{error}</p>}
-
-      {loading && !weather && <p className="status">Loading forecast…</p>}
-
-      {weather && (
-        <>
-          <section className="card current">
-            <div className="cond-badge" aria-hidden>
-              {iconFor(weather.current.conditionCode)}
-            </div>
-            <div>
-              <p className="temp">Current: {currentLabel(weather.current).t}</p>
-              <p className="feels">Feels like: {currentLabel(weather.current).f}</p>
-              <p className="cond">{labelFor(weather.current.conditionCode)} · {formatHour(weather.current.time)}</p>
-              <p className="cond">Precip chance: {currentLabel(weather.current).p} · Amount: {currentLabel(weather.current).mm}</p>
-            </div>
-          </section>
-
-          <section className="grid hourly-section">
-            <h2 className="section-title">Hourly forecast</h2>
-            <div className={hours === 6 ? "hourly hourly-six" : "hourly"}>
-              {weather.hourly.map((point) => (
-                <article key={point.time} className="hour-card">
-                  <p className="hour-time">{formatHour(point.time)}</p>
-                  <div className="hour-main">
-                    <span className="hour-icon" aria-hidden>
-                      {iconFor(point.conditionCode)}
-                    </span>
-                    <span className="hour-number">{valueOrPlaceholder(point.temp, "°C")}</span>
-                  </div>
-                  <p className="hour-sub">Feels {valueOrPlaceholder(point.feelsLike, "°C")}</p>
-                  <p className="hour-sub">P: {valueOrPlaceholder(point.precipProb, "%")} · {valueOrPlaceholder(point.precip, "mm")}</p>
-                  <p className="hour-sub">{labelFor(point.conditionCode)}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        </>
-      )}
+      {weather ? (
+        <section className="grid hourly-only">
+          <div className="hourly hourly-six">
+            {weather.hourly.map((point) => (
+              <article key={point.time} className="hour-card compact-hour-card">
+                <p className="hour-time">{formatHour(point.time)}</p>
+                <div className="hour-main">
+                  <span className="hour-icon" aria-hidden>
+                    {iconFor(point.conditionCode)}
+                  </span>
+                  <span className="hour-number">{valueOrPlaceholder(point.temp, "°C")}</span>
+                </div>
+                <p className="hour-sub">Feels {valueOrPlaceholder(point.feelsLike, "°C")}</p>
+                <p className="hour-sub">P: {valueOrPlaceholder(point.precipProb, "%")} · {valueOrPlaceholder(point.precip, "mm")}</p>
+                <p className="hour-sub">{labelFor(point.conditionCode)}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }
