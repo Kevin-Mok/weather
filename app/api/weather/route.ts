@@ -4,7 +4,7 @@ const GEOCODE_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 const NOMINATIM_API_URL = "https://nominatim.openstreetmap.org/search";
 
-const DEFAULT_POSTAL = "M1E4V4";
+const DEFAULT_POSTAL = "Scarborough, Toronto";
 const DEFAULT_TIMEZONE = "America/Toronto";
 const DEFAULT_HOURS = 12;
 
