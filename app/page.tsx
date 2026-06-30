@@ -20,7 +20,7 @@ type WeatherResponse = {
   hourly: HourPoint[];
 };
 
-const DEFAULT_POSTAL = "Scarborough, Toronto";
+const DEFAULT_POSTAL = "Toronto, Scarborough, Ontario, Canada";
 const DEFAULT_HOURS = 12;
 
 function formatHour(time: string) {

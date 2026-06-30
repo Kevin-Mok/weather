@@ -6,3 +6,4 @@
 - Deploy to Vercel after code is pushed.
 - Always share the deployed Vercel URL after deployment completion.
 - If the repo has multiple Vercel targets, confirm and share the exact target URL used for this deployment.
+- Before sharing a deployment link, verify it is updated to the current HEAD and the deployment has finished (HTTP reachable).

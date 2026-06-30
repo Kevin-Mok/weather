@@ -4,7 +4,7 @@ const GEOCODE_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 const NOMINATIM_API_URL = "https://nominatim.openstreetmap.org/search";
 
-const DEFAULT_POSTAL = "Scarborough, Toronto";
+const DEFAULT_POSTAL = "Toronto, Scarborough, Ontario, Canada";
 const DEFAULT_TIMEZONE = "America/Toronto";
 const DEFAULT_HOURS = 12;
 
@@ -132,11 +132,7 @@ async function resolveCoordinates(postalOrCity: string): Promise<{ latitude: num
   const first = payload.results?.[0];
 
   if (!first) {
-    if (looksLikePostalCode(query)) {
-      return resolveWithFallbackSearch(query);
-    }
-
-    return null;
+    return resolveWithFallbackSearch(query);
   }
 
   return {

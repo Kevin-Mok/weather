@@ -43,7 +43,7 @@ http://localhost:3000
 ### API endpoint
 
 - `GET /api/weather?postal=<string>&hours=<6|12|24>&timezone=America/Toronto`
-  - `postal` defaults to `Scarborough, Toronto`.
+  - `postal` defaults to `Toronto, Scarborough, Ontario, Canada`.
   - returns current point plus hourly points for the requested window.
 
 ## Day-to-Day Usage
@@ -57,5 +57,5 @@ http://localhost:3000
 
 - Public API integration without secrets.
 - Server/client boundary (single API route + client page) with clean separation.
-- Defensive location resolution with fallback geocoding for postal inputs.
+- Defensive location resolution with fallback geocoding for unresolved city or postal inputs.
 - Responsive dark theme optimized for quick, mobile-safe weather checks.
