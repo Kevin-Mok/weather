@@ -141,14 +141,23 @@ export default function Home() {
             {weather.hourly.map((point) => (
               <article key={point.time} className="hour-card compact-hour-card">
                 <p className="hour-time">{formatHour(point.time)}</p>
+
                 <div className="hour-main">
                   <span className="hour-icon" aria-hidden>
                     {iconFor(point.conditionCode)}
                   </span>
                   <span className="hour-number">{valueOrPlaceholder(point.temp, "°C")}</span>
                 </div>
-                <p className="hour-sub">Feels {valueOrPlaceholder(point.feelsLike, "°C")}</p>
-                <p className="hour-sub">P: {valueOrPlaceholder(point.precipProb, "%")} · {valueOrPlaceholder(point.precip, "mm")}</p>
+
+                <p className="metric metric-feels">
+                  <span className="metric-label">Feels:</span>
+                  <span className="metric-value">{valueOrPlaceholder(point.feelsLike, "°C")}</span>
+                </p>
+
+                <p className="metric metric-precip">
+                  <span className="metric-label">Precip chance:</span>
+                  <span className="metric-value">{valueOrPlaceholder(point.precipProb, "%")} · {valueOrPlaceholder(point.precip, "mm")}</span>
+                </p>
               </article>
             ))}
           </div>
