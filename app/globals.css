@@ -171,14 +171,10 @@ body {
 }
 
 @media (min-width: 641px) {
-  .hour-card:nth-child(n + 10) {
-    display: none;
-  }
-
   .hourly {
     height: 100%;
     gap: clamp(12px, 0.9vw, 18px);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     grid-template-rows: repeat(3, minmax(230px, 1fr));
   }
 

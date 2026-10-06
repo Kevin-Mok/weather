@@ -1,6 +1,6 @@
 # Weather Forecast (Next.js)
 
-A lightweight weather dashboard built for rapid local checks in Toronto and beyond: it opens to Scarborough, Toronto, starts at the current hour, and shows nine hours in a 3×3 desktop grid or twelve hours in a 2×6 mobile grid with three rows visible at a time with temperature, feels-like temperature, rain probability, and rain amount. All data comes from a single source of truth API, so you get consistent numbers between devices.
+A lightweight weather dashboard built for rapid local checks in Toronto and beyond: it opens to Scarborough, Toronto, and shows twelve hourly forecasts starting at the current hour, with temperature, feels-like temperature, rain probability, and rain amount. Desktop uses four columns and three rows; mobile uses two columns and six rows, with three rows visible at a time. All data comes from a single source of truth API, so you get consistent numbers between devices.
 
 The project demonstrates a typed server/client boundary, public weather API integration without secrets, and a responsive dark theme with minimal UI chrome for quick weather checks.
 
@@ -51,6 +51,6 @@ http://localhost:3000
 ## Day-to-Day Usage
 
 - Launch and keep the app on a tab as your quick weather reference.
-- Desktop (above 640px): nine hourly cards in three columns and three rows.
+- Desktop (above 640px): twelve hourly cards in four columns and three rows.
 - Mobile (640px and below): twelve hourly cards in two columns and six rows; scroll to see the last three rows.
 - Read at-a-glance condition visuals, feels-like temperature, rain chance, and rain amount.
