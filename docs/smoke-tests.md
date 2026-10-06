@@ -23,5 +23,6 @@ Check the forecast at desktop and phone sizes to confirm the hourly grid is read
 
 ## Deployment status
 
-- [Production](https://weather-kevinm.vercel.app): previous release ready; updated four-column release pending verification and push.
+- [Production](https://weather-kevinm.vercel.app): Ready; live browser checks passed at every dimension above with real forecast data.
+- [Verified implementation deployment](https://vercel.com/kevin-mok/weather-kevinm/4uFcxYS83PbHGcg9PeCyC14o2iCN): Vercel GitHub status for `bb82616` is `success`.
 - Deployment runs automatically through the configured Vercel GitHub integration. No separate Preview deployment is created for main-branch releases.
