@@ -14,3 +14,8 @@ This report records local tooling failures encountered while changing the deskto
 - Delivery limitation: automatic approval review rejected production deployment because it requires explicit user authorization. No deployment occurred. Mobile scope was subsequently updated to twelve cards in six rows, with three rows per screen; renewed browser verification passed at all desktop/mobile sizes listed above. Mobile shows six full cards before and after scrolling, and desktop shows nine.
 
 - Verification harness correction: generated browser-check code had an extra closing brace and failed to parse before running assertions; corrected the code assembly. No app runtime failure resulted.
+
+- Deployment retry after explicit user authorization: `vercel deploy --prod --yes --non-interactive` exited 1 with no existing credentials. Authentication is now the remaining blocker; start the normal Vercel login flow.
+
+- Remote asset check: a stale stylesheet reference returned HTTP 404 after production changed. Refetching production HTML and using its current stylesheet succeeded and confirmed both new grid rules.
+- Resolution: implementation commit a2942c1 was pushed and Vercel GitHub integration reported a successful deployment. Production https://weather-kevinm.vercel.app returned HTTP 200 and passed all desktop/mobile browser checks with real forecast data. The CLI login flow was canceled because the deployment completed through the configured GitHub integration. No host sandbox repair or CLI credential change was required.

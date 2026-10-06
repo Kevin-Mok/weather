@@ -23,4 +23,8 @@ Check the forecast at desktop and phone sizes to confirm the hourly grid is read
 
 ## Deployment status
 
-- Production deployment is blocked: automatic approval review requires explicit authorization, and Vercel CLI has no saved credentials. No new deployment URL is available.
+- [Production](https://weather-kevinm.vercel.app): Ready; HTTP 200. Vercel GitHub status for implementation commit `a2942c1` is `success`.
+- [Verified deployment details](https://vercel.com/kevin-mok/weather-kevinm/43V26YiYBosCKMhbkD6zDat9156m): automatic deployment through the configured GitHub integration.
+- No separate Preview deployment was created for this main-branch release.
+- The production browser check passed at all desktop and mobile dimensions listed above using real forecast data, including mobile scrolling and resizing back to desktop.
+- Direct CLI deployment required authentication; the existing GitHub integration successfully deployed the authorized change.
