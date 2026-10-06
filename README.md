@@ -1,8 +1,8 @@
 # Weather Forecast (Next.js)
 
-A lightweight weather dashboard built for rapid local checks in Toronto and beyond: it resolves a location from a city name or postal code, starts at the current hour, and shows the next 6/12/24 hours with temperature, feels-like temperature, rain probability, and rain amount. All data comes from a single source of truth API, so you get consistent numbers between devices.
+A lightweight weather dashboard built for rapid local checks in Toronto and beyond: it opens to Scarborough, Toronto, starts at the current hour, and shows nine hours in a 3×3 desktop grid or twelve hours in a 2×6 mobile grid with three rows visible at a time with temperature, feels-like temperature, rain probability, and rain amount. All data comes from a single source of truth API, so you get consistent numbers between devices.
 
-Unlike generic weather pages, this project keeps the flow simple: quick lookup, minimal UI chrome, and condition visuals that make hourly data readable at a glance during heat or precipitation risk decisions.
+The project demonstrates a typed server/client boundary, public weather API integration without secrets, and a responsive dark theme with minimal UI chrome for quick weather checks.
 
 ## Tech Stack And Why Chosen
 
@@ -42,20 +42,15 @@ http://localhost:3000
 
 ### API endpoint
 
-- `GET /api/weather?postal=<string>&hours=<6|12|24>&timezone=America/Toronto`
+- `GET /api/weather?postal=<string>&hours=<1–48>&timezone=America/Toronto`
   - `postal` defaults to `M1E4V4` (mapped to Scarborough, Toronto fallback coords).
+  - `hours` defaults to 12; the dashboard requests 12.
+  - Optional `lat` and `lon` bypass geocoding; the dashboard uses the default location coordinates.
   - returns current point plus hourly points for the requested window.
 
 ## Day-to-Day Usage
 
 - Launch and keep the app on a tab as your quick weather reference.
-- Search by city name (`Toronto`) or a postal code (`M1E4V4`).
-- Switch forecast depth with 6 / 12 / 24-hour options.
+- Desktop (above 640px): nine hourly cards in three columns and three rows.
+- Mobile (640px and below): twelve hourly cards in two columns and six rows; scroll to see the last three rows.
 - Read at-a-glance condition visuals, feels-like temperature, rain chance, and rain amount.
-
-## Recruiter-facing highlights
-
-- Public API integration without secrets.
-- Server/client boundary (single API route + client page) with clean separation.
-- Defensive location resolution with fallback geocoding for unresolved city or postal inputs.
-- Responsive dark theme optimized for quick, mobile-safe weather checks.
