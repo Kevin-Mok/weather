@@ -24,7 +24,7 @@ Check source selection, fallback and every hourly metric at desktop and phone si
 ## Local checks
 
 - **Action:** npm run dev -- --port 3001
-- **Expected:** Weather Forecast is available at http://localhost:3001.
+- **Expected:** Weather Forecast is available at http://localhost:3001 and serves the intended checkout. After changing production-build code, rebuild and restart `next start`; a server started on another port does not update this address. Confirm the visible metrics match the current revision.
 - **Action:** Open the page at 1440×900, 1280×800, and 1920×1080.
 - **Expected:** Twelve consecutive hourly cards form four columns and three rows; source/fetch/current labels and every hourly metric are readable. Shorter viewports scroll if needed.
 - **Action:** Resize to 768×1024, then 641×900.
