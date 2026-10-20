@@ -10,8 +10,17 @@ const DEFAULT_LATITUDE = "43.7729744";
 const DEFAULT_LONGITUDE = "-79.2576479";
 
 function formatHour(time: string) {
-  return `${time.slice(5, 10)} · ${time.slice(11, 16)}`;
+  return time.slice(11, 16);
 }
+
+const conditionImages: Record<string, string> = {
+  "A mix of sun and clouds": "partly-cloudy-day",
+  Clear: "clear-night",
+  "Mainly clear": "partly-cloudy-night",
+  "Mainly sunny": "partly-cloudy-day",
+  "Partly cloudy": "partly-cloudy-day",
+  Sunny: "clear-day",
+};
 
 function valueOrPlaceholder(value: number | null, suffix: string) {
   return typeof value === "number" ? `${Math.round(value)}${suffix}` : "n/a";
@@ -213,10 +222,13 @@ export default function Home() {
               {weather.hourly.map((point) => (
                 <article key={point.time} className="hour-card compact-hour-card">
                   <time className="hour-time" dateTime={point.time} title={point.time}>
-                    {formatHour(point.time)} <small>UTC{point.time.slice(-6)}</small>
+                    {formatHour(point.time)}
                   </time>
 
                   <div className="hour-main">
+                    {weather.hourlySource === "the-weather-network" && point.condition && Object.hasOwn(conditionImages, point.condition) ? (
+                      <img className="hour-condition-image" src={`/weather/${conditionImages[point.condition]}.svg`} width="64" height="64" alt="" aria-hidden="true" />
+                    ) : null}
                     {weather.hourlySource === "open-meteo" ? <span className="hour-icon" aria-hidden>{iconFor(point.conditionCode)}</span> : null}
                     <span className="hour-number">{valueOrPlaceholder(point.temp, "°C")}</span>
                   </div>

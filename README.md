@@ -4,6 +4,8 @@ A lightweight weather dashboard built for rapid local checks in Toronto and beyo
 
 The project demonstrates a typed server/client boundary, defensive validation of a shared public forecast feed, explicit source/fallback reporting, and a responsive dark theme. Desktop uses four columns; mobile uses two. Twelve cards form three desktop rows or six mobile rows; shorter viewports scroll to preserve readable metrics.
 
+Cards show only the local hour (`HH:mm`); hover the hour for the complete timestamp and UTC offset. The six known scraped conditions use locally bundled colorful [Meteocons](https://github.com/basmilius/meteocons) illustrations: sun for Sunny, moon for Clear, moon/cloud for Mainly clear, and sun/cloud for Mainly sunny, Partly cloudy and A mix of sun and clouds. Unknown scraped conditions retain their text without a guessed illustration. Assets and the upstream MIT license are in `public/weather/`.
+
 ## Tech Stack And Why Chosen
 
 - Next.js App Router for server route handling and fast page rendering on Vercel.

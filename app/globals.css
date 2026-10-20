@@ -95,10 +95,10 @@ body {
   color: var(--muted);
 }
 
-.hour-time small {
-  display: block;
-  font-size: 0.7rem;
-  margin-top: 2px;
+.hour-condition-image {
+  width: clamp(48px, 4vw, 64px);
+  height: clamp(48px, 4vw, 64px);
+  flex-shrink: 0;
 }
 
 .forecast-meta {

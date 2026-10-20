@@ -7,13 +7,13 @@ Check source selection, fallback and every hourly metric at desktop and phone si
 - **Action:** Configure `WEATHER_BLOB_URL` with a fresh valid published feed, start the app, then open `/api/weather?postal=M1E4V4&hours=12&timezone=America%2FToronto&lat=43.7729744&lon=-79.2576479`.
 - **Expected:** `hourlySource` is `the-weather-network`; `hourlyFetchedAt` matches the feed; `hourlyFallbackReason` is null. Twelve dated Toronto-offset records include condition, wind speed/direction/gust, humidity and precipitation chance. Negative temperatures and zero precipitation remain numbers. `currentSource` is `open-meteo`; current conditions are independent.
 - **Action:** Compare the first, middle and last displayed hours with the source and published JSON, including one expanded source row.
-- **Expected:** Every displayed metric matches the corresponding source value; source-unavailable fields display `n/a`; no fabricated precipitation amount or weather-code icon appears for scraped rows. Source data may start at the next hour.
+- **Expected:** Every displayed metric matches the corresponding source value; source-unavailable fields display `n/a`; no fabricated precipitation amount appears for scraped rows. Known scraped condition text selects a local sun/moon/cloud illustration; unknown conditions retain text without a guessed illustration. Source data may start at the next hour.
 - **Action:** In a local fixture feed, exercise a fetch time older than 90 minutes, a missing required metric, and unavailable HTTP response; reload after each change.
 - **Expected:** Open-Meteo hourly values appear with explicit `stale`, `invalid` or `unavailable` fallback metadata and readable fallback text. Removing `WEATHER_BLOB_URL` yields `unconfigured` fallback. No broken/partial scraped cards appear.
 - **Action:** Request `/api/weather?postal=Ottawa&lat=45.4215&lon=-75.6972&hours=1` and `/api/weather?postal=M1E4V4&lat=45.4215&lon=-75.6972&hours=1`.
 - **Expected:** Both use Open-Meteo with a null fallback reason and preserve the requested coordinates.
 - **Action:** Use fixtures covering midnight, spring DST and fall's repeated 01:00 hour (automated route cases also cover these), then reload.
-- **Expected:** Consecutive actual hours are selected with the correct date and offset; repeated local hours remain distinguishable by their offsets.
+- **Expected:** Consecutive actual hours are selected with the correct date and offset. Cards show only `HH:mm`; hover an hour to see its complete timestamp, including the date and offset that distinguish repeated local hours.
 - **Action:** Leave the page open for a minute while inspecting its Network panel, then hide and resume the tab.
 - **Expected:** A weather request starts every minute and on tab resume, with no overlapping requests. A source update or stale-feed fallback replaces the existing cards without reloading. Unmounting cancels any request and removes scheduled work.
 - **Action:** Serve a fixture just under 90 minutes old, then make its next response stale; also exercise a stalled response or unavailable API.
@@ -30,7 +30,7 @@ Check source selection, fallback and every hourly metric at desktop and phone si
 - **Action:** Resize to 768×1024, then 641×900.
 - **Expected:** The desktop grid retains four columns and three rows with no horizontal overflow or overlapping metrics.
 - **Action:** Resize to 390×844 and 640×900.
-- **Expected:** Twelve cards form two columns and six rows. Scrolling reveals later hours. Dates, UTC offsets, conditions, feels-like and precipitation chance remain readable with no horizontal overflow. Wind, gust and humidity are absent from cards for both forecast sources.
+- **Expected:** Twelve cards form two columns and six rows. Scrolling reveals later hours. Hour-only labels, colorful condition images, conditions, feels-like and precipitation chance remain readable with no horizontal overflow. Dates and UTC offsets appear only in hour tooltips. Wind, gust and humidity are absent from cards for both forecast sources.
 - **Action:** Resize back to desktop without reloading.
 - **Expected:** All twelve hourly cards form a 4×3 grid immediately; scrolling follows viewport height.
 

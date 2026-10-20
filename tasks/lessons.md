@@ -7,5 +7,7 @@
 
 ## 2026-10-20
 
+- Run Next.js build and typecheck sequentially: concurrent checks race on generated `.next/types` and can produce misleading TS6053 missing-file failures.
+
 - Select the current forecast from supplied epoch timestamps rather than a UTC hour floor; half-hour timezones otherwise skip their current local hour.
 - Long-lived forecast views need recurring and tab-resume refresh, bounded pending requests and complete effect cleanup. Cover timer/resume/overlap/unmount behavior with an executable clock regression as well as route freshness tests.
