@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { loadScarboroughFeed } from "../../lib/scarborough-feed";
+import { matchesScarborough, SCARBOROUGH, zonedTime } from "../../lib/weather";
+import type { ForecastPoint, WeatherResponse } from "../../lib/weather";
 
 const GEOCODE_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
@@ -9,20 +12,7 @@ const DEFAULT_TIMEZONE = "America/Toronto";
 const DEFAULT_HOURS = 12;
 
 const POSTAL_FALLBACK_COORDINATES: Record<string, { latitude: number; longitude: number; name: string }> = {
-  M1E4V4: {
-    latitude: 43.7729744,
-    longitude: -79.2576479,
-    name: "Scarborough, Toronto, Ontario, Canada",
-  },
-};
-
-type ForecastPoint = {
-  time: string;
-  temp: number | null;
-  feelsLike: number | null;
-  precipProb: number | null;
-  precip: number | null;
-  conditionCode: number | null;
+  M1E4V4: SCARBOROUGH,
 };
 
 type OMMetaLocation = {
@@ -51,29 +41,6 @@ function normalizeLocation(query: string | null): string {
 
 function normalizeForComparison(value: string): string {
   return value.replace(/\s+/g, "").toUpperCase();
-}
-
-function toHourMarker(timezone: string): string {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    hour12: false,
-  }).formatToParts(now);
-
-  const getPart = (type: Intl.DateTimeFormatPart["type"]) =>
-    parts.find((part) => part.type === type)?.value || "00";
-
-  return `${getPart("year")}-${getPart("month")}-${getPart("day")}T${getPart("hour")}:00`;
-}
-
-function sliceFromCurrentHour(times: string[], timezone: string): number {
-  const nowHour = toHourMarker(timezone);
-  const index = times.findIndex((time) => time.substring(0, 16) >= nowHour);
-  return index === -1 ? Math.max(0, times.length - 1) : index;
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -189,15 +156,31 @@ async function resolveCoordinates(postalOrCity: string): Promise<{ latitude: num
   return null;
 }
 
-function buildResponsePoint(index: number, hourly: Record<string, unknown[]>): ForecastPoint {
+function windDirection(value: unknown): string | null {
+  const degrees = parseNumber(value);
+  if (degrees === null || degrees < 0 || degrees > 360) return null;
+  const directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  return directions[Math.round(degrees / 22.5) % 16];
+}
+
+function responsePoint(point: Record<string, unknown>, timezone: string): ForecastPoint {
   return {
-    time: String(hourly.time?.[index] || ""),
-    temp: parseNumber(hourly.temperature_2m?.[index]),
-    feelsLike: parseNumber(hourly.apparent_temperature?.[index]),
-    precipProb: parseNumber(hourly.precipitation_probability?.[index]),
-    precip: parseNumber(hourly.precipitation?.[index]),
-    conditionCode: parseNumber(hourly.weather_code?.[index]),
+    time: zonedTime(Number(point.time) * 1000, timezone),
+    temp: parseNumber(point.temperature_2m),
+    feelsLike: parseNumber(point.apparent_temperature),
+    condition: null,
+    windSpeed: parseNumber(point.wind_speed_10m),
+    windDirection: windDirection(point.wind_direction_10m),
+    windGust: parseNumber(point.wind_gusts_10m),
+    humidity: parseNumber(point.relative_humidity_2m),
+    precipProb: parseNumber(point.precipitation_probability),
+    precip: parseNumber(point.precipitation),
+    conditionCode: parseNumber(point.weather_code),
   };
+}
+
+function buildResponsePoint(index: number, hourly: Record<string, unknown[]>, timezone: string): ForecastPoint {
+  return responsePoint(Object.fromEntries(Object.entries(hourly).map(([key, values]) => [key, values[index]])), timezone);
 }
 
 export async function GET(request: NextRequest) {
@@ -236,46 +219,54 @@ export async function GET(request: NextRequest) {
     locationLabel = resolved.name;
   }
 
-  const safeHours = Math.min(48, Math.max(1, Number.isFinite(hours) ? hours : DEFAULT_HOURS));
+  const safeHours = Math.min(48, Math.max(1, Number.isFinite(hours) ? Math.floor(hours) : DEFAULT_HOURS));
+  const now = Date.now();
+  const usesScarboroughFeed = normalizedPostal === DEFAULT_POSTAL && matchesScarborough(latitude, longitude) && timezone === DEFAULT_TIMEZONE;
 
   const url = `${FORECAST_API_URL}?${new URLSearchParams({
     latitude: latitude.toFixed(6),
     longitude: longitude.toFixed(6),
-    hourly: "temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code",
+    hourly: "temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m",
+    current: "temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m",
+    timeformat: "unixtime",
+    wind_speed_unit: "kmh",
     timezone,
     forecast_days: "2",
   })}`;
 
-  const forecast = await fetchJson<{
-    hourly?: Record<string, unknown[]>;
-    timezone?: string;
-  }>(url);
-
-  const hourly = forecast.hourly || {};
-  const times = (hourly.time as string[]) || [];
-
-  if (!Array.isArray(times) || times.length === 0) {
-    return NextResponse.json({ error: "No hourly forecast returned by the API." }, { status: 502 });
+  try {
+    const [forecast, feed] = await Promise.all([
+      fetchJson<{ hourly?: Record<string, unknown[]>; current?: Record<string, unknown>; timezone?: string }>(url),
+      usesScarboroughFeed ? loadScarboroughFeed(safeHours, now) : Promise.resolve(null),
+    ]);
+    const hourly = forecast.hourly || {};
+    const times = hourly.time || [];
+    if (!Array.isArray(times) || times.length === 0 || !times.every(time => typeof time === "number" && Number.isFinite(time))) {
+      return NextResponse.json({ error: "No valid hourly forecast returned by Open-Meteo." }, { status: 502 });
+    }
+    const forecastTimezone = forecast.timezone || timezone;
+    const currentIndex = times.findLastIndex(time => Number(time) * 1000 <= now);
+    const startIndex = currentIndex === -1 ? 0 : currentIndex;
+    if (Number(times[startIndex]) * 1000 + 3600000 <= now) {
+      return NextResponse.json({ error: "Open-Meteo forecast is out of date." }, { status: 502 });
+    }
+    const hourlyItems: ForecastPoint[] = [];
+    for (let i = startIndex; i < Math.min(startIndex + safeHours, times.length); i += 1) {
+      hourlyItems.push(buildResponsePoint(i, hourly, forecastTimezone));
+    }
+    const current = forecast.current && typeof forecast.current.time === "number"
+      ? responsePoint(forecast.current, forecastTimezone) : buildResponsePoint(startIndex, hourly, forecastTimezone);
+    const result: WeatherResponse = {
+      location: { name: locationLabel, latitude, longitude, timezone: forecastTimezone },
+      current,
+      currentSource: "open-meteo",
+      hourly: feed?.hourly || hourlyItems,
+      hourlySource: feed?.hourly ? "the-weather-network" : "open-meteo",
+      hourlyFetchedAt: feed?.fetchedAt || null,
+      hourlyFallbackReason: feed?.reason || null,
+    };
+    return NextResponse.json(result);
+  } catch {
+    return NextResponse.json({ error: "Weather service is unavailable. Please try again shortly." }, { status: 502 });
   }
-
-  const startIndex = sliceFromCurrentHour(times, forecast.timezone || timezone);
-  const endIndex = startIndex + safeHours;
-
-  const hourlyItems: ForecastPoint[] = [];
-  for (let i = startIndex; i < Math.min(endIndex, times.length); i += 1) {
-    hourlyItems.push(buildResponsePoint(i, hourly));
-  }
-
-  const current = hourlyItems[0] || buildResponsePoint(startIndex, hourly);
-
-  return NextResponse.json({
-    location: {
-      name: locationLabel,
-      latitude,
-      longitude,
-      timezone: forecast.timezone || timezone,
-    },
-    current,
-    hourly: hourlyItems,
-  });
 }

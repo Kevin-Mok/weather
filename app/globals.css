@@ -54,13 +54,16 @@ body {
   min-height: 100svh;
   height: 100svh;
   display: flex;
+  flex-direction: column;
+  gap: 8px;
   align-items: stretch;
 }
 
 .hourly-only {
   margin: 0;
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .hourly {
@@ -69,7 +72,7 @@ body {
   gap: 8px;
   min-height: 100%;
   height: calc(200% + 8px);
-  grid-template-rows: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(244px, 1fr));
   align-content: stretch;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -83,13 +86,34 @@ body {
   flex-direction: column;
   justify-content: space-between;
   min-height: 0;
+  min-width: 0;
 }
 
 .hour-time {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   color: var(--muted);
 }
+
+.hour-time small {
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 2px;
+}
+
+.forecast-meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.forecast-meta p { margin: 0; }
+.forecast-meta strong { color: var(--text); }
+.forecast-meta span { display: block; }
+.fallback { width: 100%; color: #f5cc83; }
 
 .hour-main {
   display: flex;
@@ -121,7 +145,7 @@ body {
   justify-content: space-between;
   margin: 2px 0;
   gap: 6px;
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   color: var(--muted);
 }
 
@@ -129,35 +153,39 @@ body {
   color: var(--muted);
   font-weight: 600;
   text-transform: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .metric-value {
   color: #eaf2ff;
   font-weight: 700;
   text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .metric-condition {
-  font-size: 0.9rem;
+  font-size: 0.78rem;
 }
 
 .metric-condition .metric-value {
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
 .metric-feels .metric-value {
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 700;
 }
 
 .metric-precip {
-  font-size: 0.86rem;
+  font-size: 0.78rem;
 }
 
 .metric-precip .metric-label,
 .metric-precip .metric-value {
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
@@ -175,7 +203,7 @@ body {
     height: 100%;
     gap: clamp(12px, 0.9vw, 18px);
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(230px, 1fr));
+    grid-template-rows: repeat(3, minmax(244px, 1fr));
   }
 
   .weather-only {
@@ -187,38 +215,38 @@ body {
     border-radius: clamp(18px, 1.4vw, 28px);
     border-width: 2px;
     min-height: 0;
-    padding: clamp(12px, 1.2vw, 20px);
+    padding: clamp(10px, 0.85vw, 16px);
   }
 
   .hour-time {
-    font-size: clamp(1.15rem, 1.4vw, 1.75rem);
+    font-size: clamp(0.85rem, 1.15vw, 1.3rem);
     line-height: 1;
   }
 
   .hour-main {
     gap: clamp(8px, 1vw, 16px);
-    margin: clamp(8px, 0.8vw, 14px) 0;
+    margin: 6px 0;
   }
 
   .hour-icon {
-    width: clamp(56px, 3.95vw, 76px);
-    height: clamp(56px, 3.95vw, 76px);
+    width: clamp(40px, 3vw, 56px);
+    height: clamp(40px, 3vw, 56px);
     border-color: var(--desktop-border);
     border-radius: clamp(16px, 1vw, 21px);
-    font-size: clamp(2rem, 2.1vw, 2.55rem);
+    font-size: clamp(1.5rem, 1.8vw, 2rem);
   }
 
   .hour-number {
-    font-size: clamp(2.4rem, 2.8vw, 3.8rem);
+    font-size: clamp(2rem, 2.5vw, 3rem);
     letter-spacing: -0.04em;
   }
 
   .metric {
     align-items: baseline;
     gap: 8px;
-    margin: clamp(6px, 0.6vw, 10px) 0 0;
-    font-size: clamp(0.9rem, 1.2vw, 1.5rem);
-    line-height: 1.05;
+    margin: 2px 0 0;
+    font-size: clamp(0.75rem, 0.95vw, 1.15rem);
+    line-height: 1.15;
   }
 
   .metric-label,
@@ -227,21 +255,21 @@ body {
   }
 
   .metric-condition .metric-value {
-    font-size: clamp(1rem, 1.3vw, 1.6rem);
+    font-size: clamp(0.78rem, 1vw, 1.2rem);
   }
 
   .metric-feels .metric-value {
-    font-size: clamp(1rem, 1.2vw, 1.5rem);
+    font-size: clamp(0.85rem, 1vw, 1.2rem);
     font-weight: 800;
   }
 
   .metric-precip {
-    font-size: clamp(0.85rem, 1.1vw, 1.4rem);
+    font-size: clamp(0.75rem, 0.95vw, 1.15rem);
   }
 
   .metric-precip .metric-label,
   .metric-precip .metric-value {
-    font-size: clamp(0.85rem, 1.1vw, 1.4rem);
+    font-size: clamp(0.75rem, 0.95vw, 1.15rem);
     font-weight: 800;
   }
 }

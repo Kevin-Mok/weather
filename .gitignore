@@ -1,6 +1,8 @@
 # Node
 node_modules
 .next
+.test-dist
+*.tsbuildinfo
 out
 
 # Logs
@@ -13,3 +15,5 @@ pnpm-debug.log*
 autosave
 .DS_Store
 .vercel
+.env*.local
+.env*

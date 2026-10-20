@@ -2,22 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type HourPoint = {
-  time: string;
-  temp: number | null;
-  feelsLike: number | null;
-  precipProb: number | null;
-  precip: number | null;
-  conditionCode: number | null;
-};
-
-type WeatherResponse = {
-  location: {
-    name: string;
-    timezone: string;
-  };
-  hourly: HourPoint[];
-};
+import type { HourlyFallbackReason, WeatherResponse } from "./lib/weather";
 
 const DEFAULT_POSTAL = "M1E4V4";
 const DEFAULT_HOURS = 12;
@@ -25,7 +10,7 @@ const DEFAULT_LATITUDE = "43.7729744";
 const DEFAULT_LONGITUDE = "-79.2576479";
 
 function formatHour(time: string) {
-  return time.slice(11, 16);
+  return `${time.slice(5, 10)} · ${time.slice(11, 16)}`;
 }
 
 function valueOrPlaceholder(value: number | null, suffix: string) {
@@ -116,7 +101,18 @@ function labelFor(code: number | null) {
   return "Cloudy";
 }
 
-async function loadWeather(postal: string, hours: number, useDefaultCoordinates = false) {
+function fallbackLabel(reason: HourlyFallbackReason) {
+  const labels: Record<HourlyFallbackReason, string> = {
+    unconfigured: "Scarborough feed is not configured.",
+    unavailable: "Scarborough feed is unavailable.",
+    invalid: "Scarborough feed failed validation.",
+    stale: "Scarborough feed is older than 90 minutes.",
+    coverage: "Scarborough feed does not cover the requested hours.",
+  };
+  return labels[reason];
+}
+
+async function loadWeather(postal: string, hours: number, useDefaultCoordinates = false, signal?: AbortSignal) {
   const params = new URLSearchParams({
     postal,
     hours: String(hours),
@@ -128,7 +124,7 @@ async function loadWeather(postal: string, hours: number, useDefaultCoordinates 
     params.set("lon", DEFAULT_LONGITUDE);
   }
 
-  const res = await fetch(`/api/weather?${params.toString()}`);
+  const res = await fetch(`/api/weather?${params.toString()}`, { signal, cache: "no-store" });
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}));
     throw new Error(payload?.error || `Weather request failed (${res.status})`);
@@ -145,21 +141,33 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
+    let inFlight = false;
+    let controller: AbortController | null = null;
+    let requestTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const fetchData = async () => {
+      if (!mounted || inFlight) return;
+      inFlight = true;
+      controller = new AbortController();
+      requestTimeout = setTimeout(() => controller?.abort(), 15000);
       try {
         setLoading(true);
         setError("");
-        const payload = await loadWeather(DEFAULT_POSTAL, DEFAULT_HOURS, true);
+        setWeather(previous => previous?.hourlySource === "the-weather-network" && previous.hourlyFetchedAt &&
+          Date.now() - Date.parse(previous.hourlyFetchedAt) > 90 * 60000 ? null : previous);
+        const payload = await loadWeather(DEFAULT_POSTAL, DEFAULT_HOURS, true, controller.signal);
         if (mounted) {
           setWeather(payload);
         }
       } catch (err) {
         if (mounted) {
-          setError(err instanceof Error ? err.message : "Unknown error fetching weather");
+          setError(controller.signal.aborted ? "Weather request timed out. Please try again shortly." :
+            err instanceof Error ? err.message : "Unknown error fetching weather");
           setWeather(null);
         }
       } finally {
+        clearTimeout(requestTimeout);
+        inFlight = false;
         if (mounted) {
           setLoading(false);
         }
@@ -167,9 +175,16 @@ export default function Home() {
     };
 
     fetchData();
+    const interval = setInterval(fetchData, 60000);
+    const onResume = () => { if (document.visibilityState === "visible") fetchData(); };
+    document.addEventListener("visibilitychange", onResume);
 
     return () => {
       mounted = false;
+      clearInterval(interval);
+      clearTimeout(requestTimeout);
+      controller?.abort();
+      document.removeEventListener("visibilitychange", onResume);
     };
   }, []);
 
@@ -180,37 +195,61 @@ export default function Home() {
       {error ? <p className="card error">{error}</p> : null}
 
       {weather ? (
-        <section className="grid hourly-only">
-          <div className="hourly">
-            {weather.hourly.map((point) => (
-              <article key={point.time} className="hour-card compact-hour-card">
-                <p className="hour-time">{formatHour(point.time)}</p>
+        <>
+          <header className="forecast-meta">
+            <p>
+              <strong>{weather.location.name}</strong>
+              <span>Hourly: {weather.hourlySource === "the-weather-network" ? "The Weather Network" : "Open-Meteo"}
+                {weather.hourlyFetchedAt ? ` · Fetched ${new Date(weather.hourlyFetchedAt).toLocaleString("en-CA", { timeZone: "America/Toronto", hour12: false })} Toronto` : ""}
+              </span>
+            </p>
+            <p>Current · Open-Meteo: {valueOrPlaceholder(weather.current.temp, "°C")} · {labelFor(weather.current.conditionCode)}</p>
+            {weather.hourlyFallbackReason ? (
+              <p className="fallback" role="status">Open-Meteo fallback · {fallbackLabel(weather.hourlyFallbackReason)}</p>
+            ) : null}
+          </header>
+          <section className="grid hourly-only" aria-label="Hourly forecast">
+            <div className="hourly">
+              {weather.hourly.map((point) => (
+                <article key={point.time} className="hour-card compact-hour-card">
+                  <time className="hour-time" dateTime={point.time} title={point.time}>
+                    {formatHour(point.time)} <small>UTC{point.time.slice(-6)}</small>
+                  </time>
 
-                <div className="hour-main">
-                  <span className="hour-icon" aria-hidden>
-                    {iconFor(point.conditionCode)}
-                  </span>
-                  <span className="hour-number">{valueOrPlaceholder(point.temp, "°C")}</span>
-                </div>
-
-                <p className="metric metric-condition">
-                  <span className="metric-label">Condition</span>
-                  <span className="metric-value">{labelFor(point.conditionCode)}</span>
-                </p>
-
-                <p className="metric metric-feels">
-                  <span className="metric-label">Feels</span>
-                  <span className="metric-value">{valueOrPlaceholder(point.feelsLike, "°C")}</span>
-                </p>
-
-                <p className="metric metric-precip">
-                  <span className="metric-label">Precip chance</span>
-                  <span className="metric-value">{valueOrPlaceholder(point.precipProb, "%")} · {valueOrPlaceholder(point.precip, "mm")}</span>
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
+                  <div className="hour-main">
+                    {weather.hourlySource === "open-meteo" ? <span className="hour-icon" aria-hidden>{iconFor(point.conditionCode)}</span> : null}
+                    <span className="hour-number">{valueOrPlaceholder(point.temp, "°C")}</span>
+                  </div>
+                  <p className="metric metric-condition">
+                    <span className="metric-label">Condition</span>
+                    <span className="metric-value">{weather.hourlySource === "the-weather-network" ? point.condition ?? "n/a" : labelFor(point.conditionCode)}</span>
+                  </p>
+                  <p className="metric metric-feels">
+                    <span className="metric-label">Feels like</span>
+                    <span className="metric-value">{valueOrPlaceholder(point.feelsLike, "°C")}</span>
+                  </p>
+                  <p className="metric">
+                    <span className="metric-label">Wind</span>
+                    <span className="metric-value">{valueOrPlaceholder(point.windSpeed, " km/h")} {point.windDirection ?? "n/a"}</span>
+                  </p>
+                  <p className="metric">
+                    <span className="metric-label">Gust</span>
+                    <span className="metric-value">{valueOrPlaceholder(point.windGust, " km/h")}</span>
+                  </p>
+                  <p className="metric">
+                    <span className="metric-label">Humidity</span>
+                    <span className="metric-value">{valueOrPlaceholder(point.humidity, "%")}</span>
+                  </p>
+                  <p className="metric metric-precip">
+                    <span className="metric-label">Precip chance</span>
+                    <span className="metric-value">{valueOrPlaceholder(point.precipProb, "%")}</span>
+                  </p>
+                  {weather.hourlySource === "open-meteo" ? <p className="metric"><span className="metric-label">Precip amount</span><span className="metric-value">{valueOrPlaceholder(point.precip, " mm")}</span></p> : null}
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
       ) : null}
     </main>
   );
