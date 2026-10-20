@@ -228,18 +228,6 @@ export default function Home() {
                     <span className="metric-label">Feels like</span>
                     <span className="metric-value">{valueOrPlaceholder(point.feelsLike, "°C")}</span>
                   </p>
-                  <p className="metric">
-                    <span className="metric-label">Wind</span>
-                    <span className="metric-value">{valueOrPlaceholder(point.windSpeed, " km/h")} {point.windDirection ?? "n/a"}</span>
-                  </p>
-                  <p className="metric">
-                    <span className="metric-label">Gust</span>
-                    <span className="metric-value">{valueOrPlaceholder(point.windGust, " km/h")}</span>
-                  </p>
-                  <p className="metric">
-                    <span className="metric-label">Humidity</span>
-                    <span className="metric-value">{valueOrPlaceholder(point.humidity, "%")}</span>
-                  </p>
                   <p className="metric metric-precip">
                     <span className="metric-label">Precip chance</span>
                     <span className="metric-value">{valueOrPlaceholder(point.precipProb, "%")}</span>

@@ -30,7 +30,7 @@ Check source selection, fallback and every hourly metric at desktop and phone si
 - **Action:** Resize to 768×1024, then 641×900.
 - **Expected:** The desktop grid retains four columns and three rows with no horizontal overflow or overlapping metrics.
 - **Action:** Resize to 390×844 and 640×900.
-- **Expected:** Twelve cards form two columns and six rows. Scrolling reveals later hours. Dates, UTC offsets, conditions, wind, gust, humidity and precipitation chance remain readable with no horizontal overflow.
+- **Expected:** Twelve cards form two columns and six rows. Scrolling reveals later hours. Dates, UTC offsets, conditions, feels-like and precipitation chance remain readable with no horizontal overflow. Wind, gust and humidity are absent from cards for both forecast sources.
 - **Action:** Resize back to desktop without reloading.
 - **Expected:** All twelve hourly cards form a 4×3 grid immediately; scrolling follows viewport height.
 

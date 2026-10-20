@@ -1,6 +1,6 @@
 # Weather Forecast (Next.js)
 
-A lightweight weather dashboard built for rapid local checks in Toronto and beyond: it opens to Scarborough, Toronto, and shows twelve hourly forecasts with temperature, feels-like temperature, condition, wind speed/direction, gust, humidity and precipitation probability. Scarborough uses a validated browser-scraped The Weather Network feed when available. Other requests and feed failures use Open-Meteo. Current conditions are separately labeled Open-Meteo.
+A lightweight weather dashboard built for rapid local checks in Toronto and beyond: it opens to Scarborough, Toronto, and shows twelve hourly forecasts with temperature, feels-like temperature, condition and precipitation probability. Scarborough uses a validated browser-scraped The Weather Network feed when available. Other requests and feed failures use Open-Meteo. Current conditions are separately labeled Open-Meteo.
 
 The project demonstrates a typed server/client boundary, defensive validation of a shared public forecast feed, explicit source/fallback reporting, and a responsive dark theme. Desktop uses four columns; mobile uses two. Twelve cards form three desktop rows or six mobile rows; shorter viewports scroll to preserve readable metrics.
 
@@ -70,6 +70,6 @@ When the feed is unconfigured, unreachable, invalid, stale or missing coverage, 
 - The page fetches every minute and when a hidden tab becomes visible. Requests never overlap and time out after 15 seconds; closing the page clears timers and cancels its pending request. Failed refreshes clear old values and show an error. Resuming an expired TWN view clears its old values while the fresh request runs.
 - Desktop (above 640px): twelve hourly cards in four columns and three rows.
 - Mobile (640px and below): twelve hourly cards in two columns and six rows; scroll to see later hours.
-- Check the hourly source and fetch timestamp, then read each card's dated time, temperature, condition, feels-like, wind, gust, humidity and precipitation chance. Open-Meteo fallback additionally includes precipitation amount.
+- Check the hourly source and fetch timestamp, then read each card's dated time, temperature, condition, feels-like and precipitation chance. Open-Meteo fallback additionally includes precipitation amount.
 - Other locations select their current local forecast hour by actual timestamps, including half-hour timezones and DST transitions.
 - Follow [the smoke tests](docs/smoke-tests.md) for feed, fallback and responsive checks.
