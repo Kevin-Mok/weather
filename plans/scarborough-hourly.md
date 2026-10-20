@@ -35,3 +35,11 @@ Use the shared Scarborough browser feed for the fixed dashboard request, retain 
 ## Delivery milestone
 
 Commit subject: `feat: display scraped Scarborough forecasts`. Implementation, tests and documentation complete. Local browser1440x900 and390x844 showed12 cards in4/2 columns, no horizontal overflow and all requested fields; local API matched the live Blob. Root coordinates publication, installed timer and production release, then records the deployment evidence. No source blockers remain; original main checkout is preserved.
+
+## Production verification
+
+- Feature commit3d1c4d634f3b787c9dd08868aad76397472127fa pushed to ssh/feat/scarborough-hourly.
+- Production deploymentdpl_8ht63rZZzX5m3FHgq8UTGvrh2wVD READY and aliased to https://weather-kevinm.vercel.app. Vercel deployment metadata gitCommitSha exactly matches the pushed feature commit.
+- Production API returns12 TWN hourly rows, currentSource open-meteo, recent fetchedAt and no fallback; every numeric/string hourly field matches public Blob.
+- Production browser1440x900 and390x844 verifies12 cards in4/2 columns, all fields and no horizontal/card overflow. Recurring API requests observed locally on the production build.
+- Source implementation complete; this documentation milestone records observed delivery. Original main checkout remains clean and preserved.

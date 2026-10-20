@@ -47,3 +47,9 @@ Check source selection, fallback and every hourly metric at desktop and phone si
 - Deployment runs automatically through the configured Vercel GitHub integration. No separate Preview deployment is created for main-branch releases.
 
 The evidence above predates feed integration. Record fresh feed/layout/deployment evidence in [the current plan](../plans/scarborough-hourly.md) before claiming the new revision is deployed.
+
+## Scarborough release verification — 2026-10-20
+
+- Production API and browser verified against the public72-hour Blob. Dashboard shows12 hourly rows with all metrics; current conditions retain the Open-Meteo label.
+- Desktop1440x900 and phone390x844 passed card count/columns/overflow checks.
+- Feature revision3d1c4d634f3b787c9dd08868aad76397472127fa deployed READY as dpl_8ht63rZZzX5m3FHgq8UTGvrh2wVD; metadata matches the commit.
